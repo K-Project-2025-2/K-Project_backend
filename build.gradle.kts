@@ -24,6 +24,8 @@ repositories {
     mavenCentral()
 }
 
+
+//의존성
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
