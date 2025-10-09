@@ -29,13 +29,15 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                         "/actuator/health",
-                        "/api/auth/register", "/api/auth/login", "/api/auth/verify"
+                        "/api/auth/signup",
+                        "/api/auth/login",
+                        "/api/auth/verify"
                 ).permitAll()
                 .anyRequest().authenticated()
         );
 
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.httpBasic(Customizer.withDefaults()); // 필요 없으면 삭제해도 됨
+        // http.httpBasic(Customizer.withDefaults()); // 필요 없으면 삭제해도 됨
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
