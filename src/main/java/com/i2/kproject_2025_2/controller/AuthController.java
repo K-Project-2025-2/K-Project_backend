@@ -2,7 +2,7 @@ package com.i2.kproject_2025_2.controller;
 
 import com.i2.kproject_2025_2.dto.AuthResponse;
 import com.i2.kproject_2025_2.dto.LoginRequest;
-import com.i2.kproject_2025_2.dto.RegisterRequest;
+import com.i2.kproject_2025_2.dto.SignupRequest;
 import com.i2.kproject_2025_2.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@Valid @RequestBody RegisterRequest req) {
-        authService.register(req);
+    public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest req) {
+        authService.signup(req);
         return ResponseEntity.ok().build();
     }
 

@@ -1,7 +1,7 @@
 package com.i2.kproject_2025_2.service;
 
 import com.i2.kproject_2025_2.dto.LoginRequest;
-import com.i2.kproject_2025_2.dto.RegisterRequest;
+import com.i2.kproject_2025_2.dto.SignupRequest;
 import com.i2.kproject_2025_2.entity.EmailVerificationToken;
 import com.i2.kproject_2025_2.entity.User;
 import com.i2.kproject_2025_2.repository.EmailVerificationTokenRepository;
@@ -44,7 +44,7 @@ public class AuthService {
 
     /** 회원가입 */
     @Transactional
-    public void register(RegisterRequest req) {
+    public void signup(SignupRequest req) {
         String username = req.username().trim().toLowerCase();
         String email = req.email().trim().toLowerCase();
 
