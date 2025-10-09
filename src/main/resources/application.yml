@@ -8,6 +8,32 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true   # SQL 콘솔 출력 (선택)
+    properties:
+      hibernate.format_sql: true
+
+  mail:                           # ✅ 이메일 인증용 (추가)
+    host: smtp.gmail.com          # Gmail 또는 학교 SMTP 서버 주소
+    port: 587
+    username: your_email@gmail.com    # 발신용 이메일
+    password: your_app_password       # 앱 비밀번호(일반 비밀번호 X)
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+jwt:                              # ✅ JWT 관련 (추가)
+  secret: your-super-secret-key-1234567890abcd   # 32바이트 이상
+  access-exp-min: 60              # 토큰 만료 시간 (분)
+  issuer: KProject
+
+app:                              # ✅ 커스텀 앱 설정 (추가)
+  allowed-email-domain: kangnam.ac.kr  # 학교 메일만 허용
+
+logging:                          # ✅ 로그 레벨 (선택)
+  level:
+    root: INFO
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: INFO
 
 server:
-  port: 8080
+  port: 8080                      # ✅ 기존 그대로 유지
