@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://127.0.0.1:3306/app_db
+    username: app_user
+    password: app1234
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080
