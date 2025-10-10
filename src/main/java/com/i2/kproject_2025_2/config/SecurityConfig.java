@@ -31,7 +31,8 @@ public class SecurityConfig {
                         "/actuator/health",
                         "/api/auth/signup",
                         "/api/auth/login",
-                        "/api/auth/verify"
+                        "/api/auth/verify",
+                        "/api/health"
                 ).permitAll()
                 .anyRequest().authenticated()
         );
