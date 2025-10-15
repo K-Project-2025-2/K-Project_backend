@@ -1,6 +1,7 @@
 package com.i2.kproject_2025_2.shuttle.controller;
 
 import com.i2.kproject_2025_2.shuttle.dto.ShuttleRouteListResponse;
+import com.i2.kproject_2025_2.shuttle.dto.ShuttleTimetableResponse;
 import com.i2.kproject_2025_2.shuttle.service.ShuttleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,12 @@ public class ShuttleController {
     @GetMapping("/routes")
     public ResponseEntity<ShuttleRouteListResponse> getShuttleRoutes(@RequestParam(required = false) boolean active) {
         ShuttleRouteListResponse response = new ShuttleRouteListResponse(shuttleService.getShuttleRoutes(active));
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/timetable")
+    public ResponseEntity<ShuttleTimetableResponse> getShuttleTimetable(@RequestParam long routeId, @RequestParam(required = false) String date) {
+        ShuttleTimetableResponse response = shuttleService.getShuttleTimetable(routeId, date);
         return ResponseEntity.ok(response);
     }
 }
