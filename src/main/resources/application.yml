@@ -15,11 +15,16 @@ spring:
   mail:                           # ✅ 이메일 인증용 (추가)
     host: smtp.gmail.com          # Gmail 또는 학교 SMTP 서버 주소
     port: 587
-    username: your_email@gmail.com    # 발신용 이메일
-    password: your_app_password       # 앱 비밀번호(일반 비밀번호 X)
+    username: shwltjq1@gmail.com    # 발신용 이메일
+    password: roriosjieopipqhq       # 앱 비밀번호(일반 비밀번호 X)
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+
+    data:
+      redis:
+        host: localhost
+        port: 6379
 
 jwt:                              # ✅ JWT 관련 (추가)
   secret: your-super-secret-key-1234567890abcd   # 32바이트 이상

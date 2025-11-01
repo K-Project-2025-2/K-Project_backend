@@ -10,22 +10,28 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String email;
+    private String username;   // 로그인용 아이디
+
+    @Column(unique = true, nullable = false)
+    private String email;      // 학교 메일 (인증용)
 
     @Column(nullable = false)
-    private String password;
+    private String password;   // BCrypt 해시
 
     @Column(nullable = false)
-    private boolean enabled = false;
+    private boolean enabled = false;  // 이메일 인증 완료 여부
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
     public enum Role { USER, ADMIN }
 
-    // === Getter/Setter 수동 구현 ===
+    // === Getter/Setter ===
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
