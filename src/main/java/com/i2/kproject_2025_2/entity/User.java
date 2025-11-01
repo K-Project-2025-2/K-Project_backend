@@ -19,7 +19,7 @@ public class User {
     private String password;   // BCrypt 해시
 
     @Column(nullable = false)
-    private boolean enabled = false;  // 이메일 인증 완료 여부
+    private boolean enabled = false;  // 이메일 인증 완료 여부..
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
