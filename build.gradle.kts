@@ -39,12 +39,13 @@ dependencies {
     // ── 보안/인증 ───────────────────────────────────────────────────────────
     implementation("org.springframework.boot:spring-boot-starter-security")       // 인증/인가 기본 프레임워크(BCrypt 포함)
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")                              // JWT 생성/파싱 API
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")                                // JWT 구현체
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")                                   // JWT 구현체
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")                             // JWT에서 Jackson(Claims 직렬화/역직렬화)
 
     // ── 입력 검증/메일 ──────────────────────────────────────────────────────
     implementation("org.springframework.boot:spring-boot-starter-validation")     // Bean Validation(@Valid, @Email 등)
     implementation("org.springframework.boot:spring-boot-starter-mail")           // JavaMailSender(이메일 인증/알림)
+
 
     // ── 문서화/개발 편의 ────────────────────────────────────────────────────
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")     // Swagger UI(OpenAPI 3 스펙 자동 문서화)
