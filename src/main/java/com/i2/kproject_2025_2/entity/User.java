@@ -10,7 +10,7 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String username;   // 로그인용 아이디
+    private String username;   // 로그인용 아이디..
 
     @Column(unique = true, nullable = false)
     private String email;      // 학교 메일 (인증용)
