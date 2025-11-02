@@ -1,16 +1,13 @@
 package com.i2.kproject_2025_2.shuttle.controller;
 
-import com.i2.kproject_2025_2.shuttle.dto.ShuttleCongestionResponse;
-import com.i2.kproject_2025_2.shuttle.dto.ShuttleLocationListResponse;
-import com.i2.kproject_2025_2.shuttle.dto.ShuttleRouteListResponse;
-import com.i2.kproject_2025_2.shuttle.dto.ShuttleTimetableResponse;
+import com.i2.kproject_2025_2.shuttle.dto.*;
 import com.i2.kproject_2025_2.shuttle.service.ShuttleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/shuttle")
@@ -19,27 +16,23 @@ public class ShuttleController {
 
     private final ShuttleService shuttleService;
 
-    @GetMapping("/routes")
-    public ResponseEntity<ShuttleRouteListResponse> getShuttleRoutes(@RequestParam(required = false) boolean active) {
-        ShuttleRouteListResponse response = new ShuttleRouteListResponse(shuttleService.getShuttleRoutes(active));
+    // ... existing methods ...
+
+    @GetMapping("/favorites")
+    public ResponseEntity<FavoriteStationListResponse> getFavoriteStations(@AuthenticationPrincipal UserDetails userDetails) {
+        FavoriteStationListResponse response = shuttleService.getFavoriteStations(userDetails.getUsername());
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/timetable")
-    public ResponseEntity<ShuttleTimetableResponse> getShuttleTimetable(@RequestParam long routeId, @RequestParam(required = false) String date) {
-        ShuttleTimetableResponse response = shuttleService.getShuttleTimetable(routeId, date);
-        return ResponseEntity.ok(response);
+    @PostMapping("/favorites")
+    public ResponseEntity<MessageResponse> addFavoriteStation(@AuthenticationPrincipal UserDetails userDetails, @RequestBody AddFavoriteRequest req) {
+        shuttleService.addFavoriteStation(userDetails.getUsername(), req.getStation());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new MessageResponse("Added to favorites"));
     }
 
-    @GetMapping("/locations")
-    public ResponseEntity<ShuttleLocationListResponse> getShuttleLocations(@RequestParam(required = false) Long routeId) {
-        ShuttleLocationListResponse response = new ShuttleLocationListResponse(shuttleService.getShuttleLocations(routeId));
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/congestion")
-    public ResponseEntity<ShuttleCongestionResponse> getShuttleCongestion(@RequestParam(required = false) Long routeId) {
-        ShuttleCongestionResponse response = shuttleService.getShuttleCongestion(routeId);
-        return ResponseEntity.ok(response);
+    @DeleteMapping("/favorites/{id}")
+    public ResponseEntity<MessageResponse> removeFavoriteStation(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
+        shuttleService.removeFavoriteStation(userDetails.getUsername(), id);
+        return ResponseEntity.ok(new MessageResponse("Removed from favorites"));
     }
 }
