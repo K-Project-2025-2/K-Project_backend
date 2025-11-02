@@ -1,5 +1,6 @@
 package com.i2.kproject_2025_2.shuttle.controller;
 
+import com.i2.kproject_2025_2.shuttle.dto.ShuttleLocationListResponse;
 import com.i2.kproject_2025_2.shuttle.dto.ShuttleRouteListResponse;
 import com.i2.kproject_2025_2.shuttle.dto.ShuttleTimetableResponse;
 import com.i2.kproject_2025_2.shuttle.service.ShuttleService;
@@ -26,6 +27,12 @@ public class ShuttleController {
     @GetMapping("/timetable")
     public ResponseEntity<ShuttleTimetableResponse> getShuttleTimetable(@RequestParam long routeId, @RequestParam(required = false) String date) {
         ShuttleTimetableResponse response = shuttleService.getShuttleTimetable(routeId, date);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/locations")
+    public ResponseEntity<ShuttleLocationListResponse> getShuttleLocations(@RequestParam(required = false) Long routeId) {
+        ShuttleLocationListResponse response = new ShuttleLocationListResponse(shuttleService.getShuttleLocations(routeId));
         return ResponseEntity.ok(response);
     }
 }
