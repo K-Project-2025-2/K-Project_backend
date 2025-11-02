@@ -1,9 +1,6 @@
 package com.i2.kproject_2025_2.shuttle.service;
 
-import com.i2.kproject_2025_2.shuttle.dto.ShuttleLocation;
-import com.i2.kproject_2025_2.shuttle.dto.ShuttleRoute;
-import com.i2.kproject_2025_2.shuttle.dto.ShuttleTimetable;
-import com.i2.kproject_2025_2.shuttle.dto.ShuttleTimetableResponse;
+import com.i2.kproject_2025_2.shuttle.dto.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -54,5 +51,15 @@ public class ShuttleService {
         return allLocations.stream()
                 .filter(location -> location.getRouteId() == routeId)
                 .collect(Collectors.toList());
+    }
+
+    public ShuttleCongestionResponse getShuttleCongestion(Long routeId) {
+        // For now, return mock data. Later, this will be fetched from a real-time data source.
+        List<ShuttleCongestion> congestionData = Arrays.asList(
+                new ShuttleCongestion("DG01", "MEDIUM", 18, 30),
+                new ShuttleCongestion("DG02", "HIGH", 28, 30)
+        );
+
+        return new ShuttleCongestionResponse(routeId, congestionData);
     }
 }

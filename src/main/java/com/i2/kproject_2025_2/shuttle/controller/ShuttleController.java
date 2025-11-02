@@ -1,5 +1,6 @@
 package com.i2.kproject_2025_2.shuttle.controller;
 
+import com.i2.kproject_2025_2.shuttle.dto.ShuttleCongestionResponse;
 import com.i2.kproject_2025_2.shuttle.dto.ShuttleLocationListResponse;
 import com.i2.kproject_2025_2.shuttle.dto.ShuttleRouteListResponse;
 import com.i2.kproject_2025_2.shuttle.dto.ShuttleTimetableResponse;
@@ -33,6 +34,12 @@ public class ShuttleController {
     @GetMapping("/locations")
     public ResponseEntity<ShuttleLocationListResponse> getShuttleLocations(@RequestParam(required = false) Long routeId) {
         ShuttleLocationListResponse response = new ShuttleLocationListResponse(shuttleService.getShuttleLocations(routeId));
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/congestion")
+    public ResponseEntity<ShuttleCongestionResponse> getShuttleCongestion(@RequestParam(required = false) Long routeId) {
+        ShuttleCongestionResponse response = shuttleService.getShuttleCongestion(routeId);
         return ResponseEntity.ok(response);
     }
 }
