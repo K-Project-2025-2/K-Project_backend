@@ -22,7 +22,7 @@ public class JwtUtil {
 
     /**
      * application.yml 에서 설정 주입:
-     * jwt.secret: 최소 256-bit(32바이트) 이상 Base64 인코딩 추천
+     * jwt.secret: 최소 256-bit(32바이트) 이상 문자열
      * jwt.issuer: 발급자
      * jwt.exp-minutes: 만료 시간(분)
      */
@@ -31,21 +31,10 @@ public class JwtUtil {
             @Value("${jwt.issuer:K-Project}") String issuer,
             @Value("${jwt.exp-minutes:120}") long expMinutes
     ) {
-        // secret 이 Base64가 아닐 경우: Keys.hmacShaKeyFor(secret.getBytes())
-        // secret 이 Base64일 경우(권장): Decoders.BASE64.decode(secret)
-        byte[] keyBytes = (isBase64(secret) ? Decoders.BASE64.decode(secret) : secret.getBytes());
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        // 비밀 키는 Base64 인코딩 없이, 문자열을 바이트로 변환하여 바로 사용
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.issuer = issuer;
         this.expMinutes = expMinutes;
-    }
-
-    private boolean isBase64(String s) {
-        try {
-            Decoders.BASE64.decode(s);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
     }
 
     /**
