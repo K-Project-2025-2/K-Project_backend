@@ -4,7 +4,7 @@ import com.i2.kproject_2025_2.security.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,18 +27,23 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                        // -- Swagger / Actuator --
                         "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                        "/actuator/health",
-                        "/api/auth/signup",
-                        "/api/auth/login",
-                        "/api/auth/verify",
-                        "/api/health"
+                        "/actuator/health", "/api/health",
+
+                        // -- Auth --
+                        "/api/auth/signup", "/api/auth/login", "/api/auth/verify",
+
+                        // -- Shuttle (Public) --
+                        "/shuttle/routes", "/shuttle/timetable", "/shuttle/locations", "/shuttle/congestion"
                 ).permitAll()
+                .requestMatchers(HttpMethod.GET, "/shuttle/favorites").authenticated()
+                .requestMatchers(HttpMethod.POST, "/shuttle/favorites").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/shuttle/favorites/**").authenticated()
                 .anyRequest().authenticated()
         );
 
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        // http.httpBasic(Customizer.withDefaults()); // 필요 없으면 삭제해도 됨
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
