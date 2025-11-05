@@ -32,15 +32,11 @@ public class SecurityConfig {
                         "/actuator/health", "/api/health",
 
                         // -- Auth --
-                        "/api/auth/signup", "/api/auth/login", "/api/auth/verify",
-
-                        // -- Shuttle (Public) --
-                        "/shuttle/routes", "/shuttle/timetable", "/shuttle/locations", "/shuttle/congestion"
+                        "/api/auth/**"
                 ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/shuttle/favorites").authenticated()
-                .requestMatchers(HttpMethod.POST, "/shuttle/favorites").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/shuttle/favorites/**").authenticated()
-                .anyRequest().authenticated()
+                .requestMatchers("/shuttle/favorites/**").authenticated() // favorites 경로는 인증 필요
+                .requestMatchers("/shuttle/**").permitAll() // 나머지 shuttle 경로는 모두 허용
+                .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
         );
 
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
