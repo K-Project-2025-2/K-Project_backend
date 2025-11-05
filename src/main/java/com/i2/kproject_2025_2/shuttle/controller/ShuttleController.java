@@ -16,7 +16,29 @@ public class ShuttleController {
 
     private final ShuttleService shuttleService;
 
-    // ... existing methods ...
+    @GetMapping("/routes")
+    public ResponseEntity<ShuttleRouteListResponse> getShuttleRoutes(@RequestParam(required = false) boolean active) {
+        ShuttleRouteListResponse response = new ShuttleRouteListResponse(shuttleService.getShuttleRoutes(active));
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/timetable")
+    public ResponseEntity<ShuttleTimetableResponse> getShuttleTimetable(@RequestParam long routeId, @RequestParam(required = false) String date) {
+        ShuttleTimetableResponse response = shuttleService.getShuttleTimetable(routeId, date);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/locations")
+    public ResponseEntity<ShuttleLocationListResponse> getShuttleLocations(@RequestParam(required = false) Long routeId) {
+        ShuttleLocationListResponse response = new ShuttleLocationListResponse(shuttleService.getShuttleLocations(routeId));
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/congestion")
+    public ResponseEntity<ShuttleCongestionResponse> getShuttleCongestion(@RequestParam(required = false) Long routeId) {
+        ShuttleCongestionResponse response = shuttleService.getShuttleCongestion(routeId);
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/favorites")
     public ResponseEntity<FavoriteStationListResponse> getFavoriteStations(@AuthenticationPrincipal UserDetails userDetails) {
