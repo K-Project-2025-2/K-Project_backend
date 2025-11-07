@@ -5,4 +5,4 @@ import jakarta.validation.constraints.NotBlank;
 public record LoginRequest(
         @NotBlank String username,    // ✅ 아이디로 로그인
         @NotBlank String password
-)
+) {}
