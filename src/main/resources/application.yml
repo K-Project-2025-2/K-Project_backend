@@ -3,7 +3,7 @@ spring:
     url: jdbc:mariadb://3.36.32.57:3306/kproject
     username: root
     password: app1234
-    driver-class-name: org.mariadb.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver #...
 
   jpa:
     hibernate:
