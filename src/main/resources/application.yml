@@ -1,44 +1,46 @@
 spring:
   datasource:
-    url: jdbc:mariadb://127.0.0.1:3306/app_db
-    username: app_user
+    url: jdbc:mariadb://3.36.32.57:3306/kproject
+    username: root
     password: app1234
     driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true   # SQL 콘솔 출력 (선택)
+      ddl-auto: update       # DB 스키마 자동 업데이트 (운영은 none 권장)
+    show-sql: true           # 콘솔에 SQL 출력
     properties:
       hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.MariaDBDialect
 
-  mail:                           # ✅ 이메일 인증용 (추가)
-    host: smtp.gmail.com          # Gmail 또는 학교 SMTP 서버 주소
+  mail:                           # ✅ 이메일 인증용
+    host: smtp.gmail.com
     port: 587
-    username: shwltjq1@gmail.com    # 발신용 이메일
-    password: roriosjieopipqhq       # 앱 비밀번호(일반 비밀번호 X)
+    username: shwltjq1@gmail.com      # Gmail 또는 학교 SMTP
+    password: roriosjieopipqhq        # 앱 비밀번호(2단계 인증 후 발급)
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
-    data:
-      redis:
-        host: localhost
-        port: 6379
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
-jwt:                              # ✅ JWT 관련 (추가)
+jwt:                               # ✅ JWT 설정
   secret: your-super-secret-key-1234567890abcd   # 32바이트 이상
-  access-exp-min: 60              # 토큰 만료 시간 (분)
+  access-exp-min: 60
   issuer: KProject
 
-app:                              # ✅ 커스텀 앱 설정 (추가)
-  allowed-email-domain: kangnam.ac.kr  # 학교 메일만 허용
+app:                               # ✅ 앱 설정
+  allowed-email-domain: kangnam.ac.kr
 
-logging:                          # ✅ 로그 레벨 (선택)
+logging:
   level:
     root: INFO
     org.hibernate.SQL: DEBUG
     org.springframework.security: INFO
 
 server:
-  port: 8080                      # ✅ 기존 그대로 유지
+  port: 8080
+  address: 0.0.0.0   # ✅ 외부에서 접속 가능하게 설정
