@@ -50,7 +50,7 @@ public class EmailVerificationService {
         String attemptsStr = ops.get(keyAttempts(email));
         int attempts = attemptsStr == null ? 0 : Integer.parseInt(attemptsStr);
         if (attempts >= MAX_ATTEMPTS) {
-            // 잠금: 코드/시도 모두 제거하여 재발송 유도
+            // 잠금: 코드/시도 모두 제거하여 재발송 유도...
             redis.delete(keyCode(email));
             redis.delete(keyAttempts(email));
             return VerifyResult.locked();
