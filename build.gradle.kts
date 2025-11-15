@@ -31,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")       // 애플리케이션 헬스체크/메트릭/엔드포인트
     implementation("org.springframework.boot:spring-boot-starter-web")            // Spring MVC + 내장 톰캣(REST API)
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.3")
+    runtimeOnly("com.h2database:h2")
     // ── 데이터 접근 ─────────────────────────────────────────────────────────
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")       // JPA/Hibernate 기반 ORM
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")                            // MariaDB JDBC 드라이버

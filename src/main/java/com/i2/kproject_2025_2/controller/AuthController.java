@@ -18,21 +18,28 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // ---------------------- 🧩 회원가입 ----------------------
     @Tag(name = "Auth - Sign Up", description = "회원가입 및 이메일 인증")
-    @Operation(summary = "회원가입", description = "학교 메일(@kangnam.ac.kr)만 가입 가능하며, 이메일 인증 링크가 발송됩니다.")
-    @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest req) {
-        authService.signup(req);
+    @Operation(summary = "1. 이메일 인증 코드 발송", description = "학교 메일(@kangnam.ac.kr)로 인증 코드를 발송합니다.")
+    @PostMapping("/send-verification-code")
+    public ResponseEntity<Void> sendVerificationCode(@RequestParam String email) {
+        authService.sendVerificationCode(email);
         return ResponseEntity.ok().build();
     }
 
     @Tag(name = "Auth - Sign Up")
-    @Operation(summary = "이메일 인증", description = "회원가입 후 이메일로 전송된 인증 링크 클릭 시 호출됩니다.")
-    @GetMapping("/verify")
-    public ResponseEntity<String> verify(@RequestParam String token) {
-        authService.verify(token);
-        return ResponseEntity.ok("이메일 인증 완료! 이제 로그인하세요.");
+    @Operation(summary = "2. 이메일 인증 코드 확인", description = "발송된 인증 코드를 확인합니다.")
+    @PostMapping("/verify-code")
+    public ResponseEntity<String> verifyCode(@RequestParam String email, @RequestParam String code) {
+        authService.verifyCode(email, code);
+        return ResponseEntity.ok("이메일 인증 완료!");
+    }
+
+    @Tag(name = "Auth - Sign Up")
+    @Operation(summary = "3. 회원가입", description = "인증된 이메일과 비밀번호로 회원가입을 완료합니다.")
+    @PostMapping("/signup")
+    public ResponseEntity<Void> signup(@Valid @RequestBody SignupRequest req) {
+        authService.signup(req);
+        return ResponseEntity.ok().build();
     }
 
     // ---------------------- 🔐 로그인 ----------------------

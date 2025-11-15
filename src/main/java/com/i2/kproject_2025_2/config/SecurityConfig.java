@@ -68,9 +68,10 @@ public class SecurityConfig {
 
                         // ✅ 인증 없이 접근 가능한 인증 관련 엔드포인트들
                         .requestMatchers(
+                                "/api/auth/send-verification-code",
+                                "/api/auth/verify-code",
                                 "/api/auth/signup",
                                 "/api/auth/login",
-                                "/api/auth/verify",
                                 "/api/devmail/**"
                         ).permitAll()
 

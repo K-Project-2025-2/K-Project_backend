@@ -19,14 +19,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Locale;
-import java.util.UUID;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepo;
-    private final EmailVerificationTokenRepository tokenRepo;
+    private final EmailVerificationTokenRepository verificationRepo;
     private final PasswordEncoder encoder;
     private final JavaMailSender mailSender;
     private final JwtUtil jwtUtil;
@@ -42,67 +42,96 @@ public class AuthService {
         }
     }
 
-    /** 회원가입 */
     @Transactional
-    public void signup(SignupRequest req) {
-        String username = req.username().trim().toLowerCase();
-        String email = req.email().trim().toLowerCase();
-
+    public void sendVerificationCode(String email) {
+        email = email.trim().toLowerCase();
         assertSchoolEmail(email);
 
-        if (userRepo.existsByUsername(username))
+        if (userRepo.existsByEmail(email)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 등록된 이메일입니다.");
+        }
+
+        String code = generateVerificationCode();
+        EmailVerificationToken verification = verificationRepo.findByEmail(email)
+                .orElse(new EmailVerificationToken());
+
+        verification.setEmail(email);
+        verification.setCode(code);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(10)); // 10분 후 만료
+        verification.setVerified(false);
+        verificationRepo.save(verification);
+
+        sendVerificationMail(email, code);
+    }
+
+    private String generateVerificationCode() {
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000); // 6자리 인증 코드 생성
+        return String.valueOf(code);
+    }
+
+    private void sendVerificationMail(String to, String code) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(to);
+        msg.setSubject("[K-Project] 이메일 인증 코드");
+        msg.setText("인증 코드는 " + code + " 입니다. 10분 이내에 입력해주세요.");
+        mailSender.send(msg);
+    }
+
+    @Transactional
+    public void verifyCode(String email, String code) {
+        email = email.trim().toLowerCase();
+        EmailVerificationToken verification = verificationRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증 코드가 발송되지 않은 이메일입니다."));
+
+        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.GONE, "인증 코드가 만료되었습니다.");
+        }
+
+        if (!verification.getCode().equals(code)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "인증 코드가 올바르지 않습니다.");
+        }
+
+        verification.setVerified(true);
+        verificationRepo.save(verification);
+    }
+
+    @Transactional
+    public void signup(SignupRequest req) {
+        String email = req.email().trim().toLowerCase();
+
+        EmailVerificationToken verification = verificationRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일 인증이 필요합니다."));
+
+        if (!verification.isVerified()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다.");
+        }
+        
+        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.GONE, "인증 세션이 만료되었습니다. 다시 인증해주세요.");
+        }
+
+        if (userRepo.existsByUsername(req.username()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다.");
         if (userRepo.existsByEmail(email))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 등록된 이메일입니다.");
 
         User user = new User();
-        user.setUsername(username);
+        user.setUsername(req.username().trim().toLowerCase());
         user.setEmail(email);
         user.setPassword(encoder.encode(req.password()));
-        user.setEnabled(false);
+        user.setEnabled(true); // 바로 활성화
         userRepo.save(user);
 
-        EmailVerificationToken token = new EmailVerificationToken();
-        token.setToken(UUID.randomUUID().toString());
-        token.setUser(user);
-        token.setExpiresAt(LocalDateTime.now().plusHours(2));
-        tokenRepo.save(token);
-
-        sendVerifyMail(email, token.getToken());
+        verificationRepo.delete(verification); // 회원가입 완료 후 인증 정보 삭제
     }
 
-    private void sendVerifyMail(String to, String token) {
-        String link = "http://localhost:8080/api/auth/verify?token=" + token;
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(to);
-        msg.setSubject("[K-Project] 이메일 인증 링크");
-        msg.setText("아래 링크를 2시간 이내에 클릭해 이메일을 인증하세요.\n" + link);
-        mailSender.send(msg);
-    }
-
-    /** 이메일 인증 */
-    @Transactional
-    public void verify(String token) {
-        var t = tokenRepo.findByToken(token)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "토큰이 유효하지 않습니다."));
-        if (t.getExpiresAt().isBefore(LocalDateTime.now()))
-            throw new ResponseStatusException(HttpStatus.GONE, "토큰이 만료되었습니다.");
-
-        var user = t.getUser();
-        if (!user.isEnabled()) {
-            user.setEnabled(true);
-            userRepo.save(user);
-        }
-        tokenRepo.delete(t);
-    }
-
-    /** 로그인 */
     public String login(LoginRequest req) {
         var user = userRepo.findByUsername(req.username().trim().toLowerCase())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."));
 
         if (!user.isEnabled())
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "이메일 인증이 필요합니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "비활성화된 계정입니다.");
         if (!encoder.matches(req.password(), user.getPassword()))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다.");
 
