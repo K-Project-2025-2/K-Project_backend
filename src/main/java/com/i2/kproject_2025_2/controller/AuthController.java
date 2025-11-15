@@ -19,7 +19,7 @@ public class AuthController {
     private final AuthService authService;
 
     @Tag(name = "Auth - Sign Up", description = "회원가입 및 이메일 인증")
-    @Operation(summary = "1. 이메일 인증 코드 발송", description = "학교 메일(@kangnam.ac.kr)로 인증 코드를 발송합니다.")
+    @Operation(summary = "1. 이메일 인증 코드 발송", description = "학교 메일(@kangnam.ac.kr)로 인증 코드를 발송합니다...")
     @PostMapping("/send-verification-code")
     public ResponseEntity<Void> sendVerificationCode(@RequestParam String email) {
         authService.sendVerificationCode(email);
