@@ -31,7 +31,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "build/libs/K-Project_2025_2-0.0.1-SNAPSHOT.jar"
-          target: "/home/ubuntu/app/app.jar"
+          target: "/home/ubuntu/app" 
+          overwrite: true             
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.10
