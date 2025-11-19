@@ -17,7 +17,7 @@ import java.util.Map;
 public class JwtUtil {
 
     private final Key key;
-    private final String issuer;
+    //private final String issuer;
     private final long expMinutes;
 
     /**
@@ -33,7 +33,7 @@ public class JwtUtil {
     ) {
         // 비밀 키는 Base64 인코딩 없이, 문자열을 바이트로 변환하여 바로 사용
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
-        this.issuer = issuer;
+        //this.issuer = issuer;
         this.expMinutes = expMinutes;
     }
 
@@ -49,7 +49,7 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .setSubject(subject)
-                .setIssuer(issuer)
+                //.setIssuer(issuer)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(exp))
                 .addClaims(Map.of(
@@ -65,7 +65,7 @@ public class JwtUtil {
     public Claims parseClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
-                .requireIssuer(issuer) // issuer 일치 강제(원치 않으면 제거 가능)
+                //.requireIssuer(issuer) // issuer 일치 강제(원치 않으면 제거 가능)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
