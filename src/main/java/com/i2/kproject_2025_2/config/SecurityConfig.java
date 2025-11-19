@@ -32,13 +32,13 @@ public class SecurityConfig {
                         "/actuator/health", "/api/health",
 
                         // -- Auth --
-                        "/api/auth/signup", "/api/auth/login", "/api/auth/verify",
+                        "/api/auth/**",
 
                         // -- Shuttle (Public) --
                         "/shuttle/routes", "/shuttle/timetable", "/shuttle/locations", "/shuttle/congestion"
                 ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/shuttle/favorites").authenticated()
-                .requestMatchers(HttpMethod.POST, "/shuttle/favorites").authenticated()
+                .requestMatchers(HttpMethod.GET, "/shuttle/favorites", "/shuttle/favorites/").authenticated()
+                .requestMatchers(HttpMethod.POST, "/shuttle/favorites", "/shuttle/favorites/").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/shuttle/favorites/**").authenticated()
                 .anyRequest().authenticated()
         );
