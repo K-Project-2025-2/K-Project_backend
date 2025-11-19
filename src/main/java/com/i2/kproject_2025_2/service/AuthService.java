@@ -127,14 +127,14 @@ public class AuthService {
     }
 
     public String login(LoginRequest req) {
-        var user = userRepo.findByUsername(req.username().trim().toLowerCase())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."));
+        var user = userRepo.findByEmail(req.email().trim().toLowerCase())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."));
 
         if (!user.isEnabled())
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "비활성화된 계정입니다.");
         if (!encoder.matches(req.password(), user.getPassword()))
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
 
-        return jwtUtil.generate(user.getUsername(), user.getRole().name());
+        return jwtUtil.generate(user.getEmail(), user.getRole().name());
     }
 }

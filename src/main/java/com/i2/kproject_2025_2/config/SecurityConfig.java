@@ -7,7 +7,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -17,15 +20,26 @@ import org.springframework.web.cors.*;
 import java.util.List;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    // ✅ 선택 주입: JwtFilter가 빈으로 있을 때만 주입
-    @Autowired(required = false)
+    @Autowired
     private JwtFilter jwtFilter;
 
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * UserDetailsService를 명시적으로 등록하여, Spring Security가 기본 사용자를 생성하지 않도록 방지합니다.
+     * JWT 인증을 사용하므로, 이 UserDetailsService는 실제로 사용되지 않습니다.
+     */
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> {
+            throw new UsernameNotFoundException("UserDetailsService is not used in JWT authentication.");
+        };
     }
 
     @Bean
@@ -79,10 +93,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        // ✅ JwtFilter가 존재할 때만 등록 (UsernamePasswordAuthenticationFilter 앞에)
-        if (jwtFilter != null) {
-            http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        }
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

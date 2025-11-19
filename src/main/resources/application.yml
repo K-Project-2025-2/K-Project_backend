@@ -40,6 +40,7 @@ logging:
     root: INFO
     org.hibernate.SQL: DEBUG
     org.springframework.security: INFO
+    com.i2.kproject_2025_2.security: DEBUG  # ✅ JwtFilter 로그를 확실히 보기 위해 DEBUG로 설정
 
 server:
   port: 8080

@@ -75,9 +75,9 @@ public class ShuttleService {
     }
 
     @Transactional(readOnly = true)
-    public FavoriteStationListResponse getFavoriteStations(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public FavoriteStationListResponse getFavoriteStations(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         List<FavoriteStationDto> favorites = favoriteStationRepository.findByUser_Id(user.getId())
                 .stream()
@@ -88,9 +88,9 @@ public class ShuttleService {
     }
 
     @Transactional
-    public void addFavoriteStation(String username, String station) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public void addFavoriteStation(String email, String station) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         FavoriteStation favoriteStation = new FavoriteStation();
         favoriteStation.setUser(user);
@@ -99,9 +99,9 @@ public class ShuttleService {
     }
 
     @Transactional
-    public void removeFavoriteStation(String username, Long favoriteId) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public void removeFavoriteStation(String email, Long favoriteId) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         FavoriteStation favorite = favoriteStationRepository.findById(favoriteId)
                 .orElseThrow(() -> new RuntimeException("Favorite not found"));

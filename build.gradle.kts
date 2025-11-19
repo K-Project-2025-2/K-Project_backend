@@ -1,7 +1,7 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.6"
-    id("io.spring.dependency-management") version "1.1.7"
+    id("org.springframework.boot") version "3.3.1" // ✅ 안정적인 버전으로 변경
+    id("io.spring.dependency-management") version "1.1.5" // ✅ 버전에 맞춰 함께 변경
 }
 
 group = "com.I2"
@@ -31,7 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")       // 애플리케이션 헬스체크/메트릭/엔드포인트
     implementation("org.springframework.boot:spring-boot-starter-web")            // Spring MVC + 내장 톰캣(REST API)
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.3")
-    runtimeOnly("com.h2database:h2")
+    // runtimeOnly("com.h2database:h2") // 자동 설정을 유발하므로 주석 처리
     // ── 데이터 접근 ─────────────────────────────────────────────────────────
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")       // JPA/Hibernate 기반 ORM
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")                            // MariaDB JDBC 드라이버

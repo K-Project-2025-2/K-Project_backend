@@ -19,9 +19,9 @@ public class LostAndFoundService {
     private final UserRepository userRepository;
 
     @Transactional
-    public LostItemReportResponse reportLostItem(String username, LostItemReportRequest request) {
-        User reporter = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    public LostItemReportResponse reportLostItem(String email, LostItemReportRequest request) {
+        User reporter = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         LostItemReport report = new LostItemReport();
         report.setReporter(reporter);

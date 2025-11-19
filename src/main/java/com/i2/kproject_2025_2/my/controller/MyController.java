@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,8 +19,8 @@ public class MyController {
     // ... (existing methods) ...
 
     @PostMapping("/report")
-    public ResponseEntity<UserReportResponse> reportUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserReportRequest request) {
-        UserReportResponse response = myService.reportUser(userDetails.getUsername(), request);
+    public ResponseEntity<UserReportResponse> reportUser(@AuthenticationPrincipal String email, @RequestBody UserReportRequest request) {
+        UserReportResponse response = myService.reportUser(email, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

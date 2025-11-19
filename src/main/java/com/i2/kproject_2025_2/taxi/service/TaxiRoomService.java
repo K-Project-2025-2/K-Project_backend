@@ -25,8 +25,8 @@ public class TaxiRoomService {
     private final UserRepository userRepo;
 
     @Transactional
-    public RoomResponse createRoom(String principalName, CreateRoomRequest req) {
-        User leader = userRepo.findByUsername(principalName)
+    public RoomResponse createRoom(String email, CreateRoomRequest req) {
+        User leader = userRepo.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
         int capacity = req.capacity() == null ? 0 : req.capacity();
@@ -69,8 +69,8 @@ public class TaxiRoomService {
     }
 
     @Transactional
-    public RoomResponse joinRoom(String principalName, JoinRoomRequest req) {
-        User user = userRepo.findByUsername(principalName)
+    public RoomResponse joinRoom(String email, JoinRoomRequest req) {
+        User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
         TaxiRoom room = roomRepo.findByRoomCode(req.roomCode())
@@ -114,4 +114,3 @@ public class TaxiRoomService {
         );
     }
 }
-

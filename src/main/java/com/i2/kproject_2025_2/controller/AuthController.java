@@ -44,7 +44,7 @@ public class AuthController {
 
     // ---------------------- 🔐 로그인 ----------------------
     @Tag(name = "Auth - Login", description = "로그인 및 JWT 발급")
-    @Operation(summary = "로그인", description = "회원가입 및 이메일 인증 완료 후, 아이디와 비밀번호로 JWT 토큰을 발급받습니다.")
+    @Operation(summary = "로그인", description = "회원가입 및 이메일 인증 완료 후, 이메일과 비밀번호로 JWT 토큰을 발급받습니다.")
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest req) {
         String token = authService.login(req);

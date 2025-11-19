@@ -20,9 +20,9 @@ public class MyService {
     // ... (existing methods) ...
 
     @Transactional
-    public UserReportResponse reportUser(String reporterUsername, UserReportRequest request) {
-        User reporter = userRepository.findByUsername(reporterUsername)
-                .orElseThrow(() -> new UsernameNotFoundException("Reporter not found: " + reporterUsername));
+    public UserReportResponse reportUser(String reporterEmail, UserReportRequest request) {
+        User reporter = userRepository.findByEmail(reporterEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Reporter not found with email: " + reporterEmail));
 
         User reported = userRepository.findById(request.getReportedUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("Reported user not found"));

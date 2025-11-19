@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,20 +40,20 @@ public class ShuttleController {
     }
 
     @GetMapping("/favorites")
-    public ResponseEntity<FavoriteStationListResponse> getFavoriteStations(@AuthenticationPrincipal UserDetails userDetails) {
-        FavoriteStationListResponse response = shuttleService.getFavoriteStations(userDetails.getUsername());
+    public ResponseEntity<FavoriteStationListResponse> getFavoriteStations(@AuthenticationPrincipal String email) {
+        FavoriteStationListResponse response = shuttleService.getFavoriteStations(email);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/favorites")
-    public ResponseEntity<MessageResponse> addFavoriteStation(@AuthenticationPrincipal UserDetails userDetails, @RequestBody AddFavoriteRequest req) {
-        shuttleService.addFavoriteStation(userDetails.getUsername(), req.getStation());
+    public ResponseEntity<MessageResponse> addFavoriteStation(@AuthenticationPrincipal String email, @RequestBody AddFavoriteRequest req) {
+        shuttleService.addFavoriteStation(email, req.getStation());
         return ResponseEntity.status(HttpStatus.CREATED).body(new MessageResponse("Added to favorites"));
     }
 
     @DeleteMapping("/favorites/{id}")
-    public ResponseEntity<MessageResponse> removeFavoriteStation(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
-        shuttleService.removeFavoriteStation(userDetails.getUsername(), id);
+    public ResponseEntity<MessageResponse> removeFavoriteStation(@AuthenticationPrincipal String email, @PathVariable Long id) {
+        shuttleService.removeFavoriteStation(email, id);
         return ResponseEntity.ok(new MessageResponse("Removed from favorites"));
     }
 }
