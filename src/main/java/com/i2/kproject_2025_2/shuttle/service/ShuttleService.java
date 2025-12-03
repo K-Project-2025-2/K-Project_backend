@@ -5,16 +5,16 @@ import com.i2.kproject_2025_2.repository.UserRepository;
 import com.i2.kproject_2025_2.shuttle.dto.*;
 import com.i2.kproject_2025_2.shuttle.entity.FavoriteStation;
 import com.i2.kproject_2025_2.shuttle.repository.FavoriteStationRepository;
+import com.i2.kproject_2025_2.shuttle.repository.ShuttleRouteRepository;
+import com.i2.kproject_2025_2.shuttle.repository.ShuttleTimetableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,23 +24,37 @@ public class ShuttleService {
 
     private final FavoriteStationRepository favoriteStationRepository;
     private final UserRepository userRepository;
+    private final ShuttleRouteRepository shuttleRouteRepository;
+    private final ShuttleTimetableRepository shuttleTimetableRepository;
 
     public List<ShuttleRoute> getShuttleRoutes(boolean active) {
-        // For now, return mock data. Later, this will be fetched from the database.
-        ShuttleRoute routeA = new ShuttleRoute(1L, "A노선", "기흥역", "강남대학교 정문", Arrays.asList("기흥역", "강남대역", "기숙사", "정문"));
-        ShuttleRoute routeB = new ShuttleRoute(2L, "B노선", "강남대학교", "기흥역", null);
+        // 데이터베이스에서 모든 노선 정보를 조회합니다.
+        List<com.i2.kproject_2025_2.shuttle.entity.ShuttleRoute> routeEntities = shuttleRouteRepository.findAll();
 
-        // The 'active' parameter is not used for now, but can be used for filtering later.
-        return Arrays.asList(routeA, routeB);
+        // 엔티티 목록을 DTO 목록으로 변환합니다.
+        return routeEntities.stream()
+                .map(entity -> new ShuttleRoute(
+                        entity.getId(),
+                        entity.getName(),
+                        entity.getOrigin(),
+                        entity.getDestination(),
+                        entity.getStations()
+                ))
+                .collect(Collectors.toList());
     }
 
     public ShuttleTimetableResponse getShuttleTimetable(long routeId, String date) {
-        // For now, return mock data. Later, this will be fetched from the database.
-        List<ShuttleTimetable> timetable = Arrays.asList(
-                new ShuttleTimetable("08:00", "DG01"),
-                new ShuttleTimetable("08:20", "DG02"),
-                new ShuttleTimetable("08:40", "DG03")
-        );
+        // TODO: date 파라미터를 사용한 요일별/날짜별 필터링 로직 추가 필요
+        List<com.i2.kproject_2025_2.shuttle.entity.ShuttleTimetable> timetableEntities =
+                shuttleTimetableRepository.findByRouteIdOrderByDepartureTimeAsc(routeId);
+
+        // 엔티티 목록을 DTO 목록으로 변환
+        List<ShuttleTimetable> timetable = timetableEntities.stream()
+                .map(entity -> new ShuttleTimetable(
+                        entity.getDepartureTime().format(DateTimeFormatter.ofPattern("HH:mm")),
+                        entity.getBusNumber()
+                ))
+                .collect(Collectors.toList());
 
         String responseDate = (date == null) ? LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) : date;
 
@@ -48,29 +62,13 @@ public class ShuttleService {
     }
 
     public List<ShuttleLocation> getShuttleLocations(Long routeId) {
-        // For now, return mock data. Later, this will be fetched from a real-time data source.
-        List<ShuttleLocation> allLocations = Arrays.asList(
-                new ShuttleLocation("DG01", 1L, 37.275391, 127.115723, 23.5, OffsetDateTime.now(ZoneOffset.UTC), "강남대역", "기숙사"),
-                new ShuttleLocation("DG02", 1L, 37.276211, 127.118302, 0.0, OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(10), "정문", null),
-                new ShuttleLocation("DG03", 2L, 37.275391, 127.115723, 40.0, OffsetDateTime.now(ZoneOffset.UTC), "강남대역", "기흥역")
-        );
-
-        if (routeId == null) {
-            return allLocations;
-        }
-
-        return allLocations.stream()
-                .filter(location -> location.getRouteId() == routeId)
-                .collect(Collectors.toList());
+        // TODO: 실시간 위치 정보 소스(e.g., WebSocket, 외부 API) 연동 필요
+        return Collections.emptyList(); // 비어있는 리스트 반환
     }
 
     public ShuttleCongestionResponse getShuttleCongestion(Long routeId) {
-        // For now, return mock data. Later, this will be fetched from a real-time data source.
-        List<ShuttleCongestion> congestionData = Arrays.asList(
-                new ShuttleCongestion("DG01", "MEDIUM", 18, 30),
-                new ShuttleCongestion("DG02", "HIGH", 28, 30)
-        );
-
+        // TODO: 실시간 혼잡도 정보 소스 연동 필요
+        List<ShuttleCongestion> congestionData = Collections.emptyList(); // 비어있는 리스트 반환
         return new ShuttleCongestionResponse(routeId, congestionData);
     }
 
