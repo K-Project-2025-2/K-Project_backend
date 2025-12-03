@@ -8,6 +8,7 @@ import com.i2.kproject_2025_2.taxi.dto.ChatMessageRequest;
 import com.i2.kproject_2025_2.taxi.dto.ChatMessageResponse;
 import com.i2.kproject_2025_2.taxi.service.TaxiRoomService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class TaxiRoomController {
             """)
     @PostMapping
     public ResponseEntity<RoomResponse> createRoom(Principal principal,
-                                                   @RequestBody CreateRoomRequest req) {
+                                                   @RequestBody @Valid CreateRoomRequest req) {
         RoomResponse res = taxiRoomService.createRoom(principal.getName(), req);
         return ResponseEntity.ok(res);
     }
@@ -40,7 +41,7 @@ public class TaxiRoomController {
             """)
     @PostMapping("/join")
     public ResponseEntity<RoomResponse> joinRoom(Principal principal,
-                                                 @RequestBody JoinRoomRequest req) {
+                                                 @RequestBody @Valid JoinRoomRequest req) {
         RoomResponse res = taxiRoomService.joinRoom(principal.getName(), req);
         return ResponseEntity.ok(res);
     }
@@ -52,7 +53,7 @@ public class TaxiRoomController {
             """)
     @PostMapping("/leave")
     public ResponseEntity<RoomResponse> leaveRoom(Principal principal,
-                                                  @RequestBody LeaveRoomRequest req) {
+                                                  @RequestBody @Valid LeaveRoomRequest req) {
         RoomResponse res = taxiRoomService.leaveRoom(principal.getName(), req);
         return ResponseEntity.ok(res);
     }
@@ -65,7 +66,7 @@ public class TaxiRoomController {
     @PostMapping("/{roomCode}/messages")
     public ResponseEntity<ChatMessageResponse> sendMessage(Principal principal,
                                                            @PathVariable String roomCode,
-                                                           @RequestBody ChatMessageRequest req) {
+                                                           @RequestBody @Valid ChatMessageRequest req) {
         ChatMessageResponse res = taxiRoomService.sendMessage(principal.getName(), roomCode, req);
         return ResponseEntity.ok(res);
     }
