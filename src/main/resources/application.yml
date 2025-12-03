@@ -28,7 +28,7 @@ spring:
       port: 6379
 
 jwt:                               # ✅ JWT 설정
-  secret: your-super-secret-key-1234567890abcd   # 32바이트 이상
+  secret: your-super-secret-key-1234567890abcd   # 32바이트 이상..
   access-exp-min: 60
   issuer: KProject
 
