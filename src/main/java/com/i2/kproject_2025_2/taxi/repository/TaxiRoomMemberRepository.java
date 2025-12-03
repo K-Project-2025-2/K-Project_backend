@@ -7,4 +7,5 @@ public interface TaxiRoomMemberRepository extends JpaRepository<TaxiRoomMember, 
     boolean existsByRoom_IdAndUser_Id(Long roomId, Long userId);
     long countByRoom_Id(Long roomId);
     java.util.Optional<TaxiRoomMember> findByRoom_IdAndUser_Id(Long roomId, Long userId);
+    java.util.List<TaxiRoomMember> findByRoom_Id(Long roomId);
 }
