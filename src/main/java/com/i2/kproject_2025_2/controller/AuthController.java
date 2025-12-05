@@ -2,6 +2,7 @@ package com.i2.kproject_2025_2.controller;
 
 import com.i2.kproject_2025_2.dto.AuthResponse;
 import com.i2.kproject_2025_2.dto.LoginRequest;
+import com.i2.kproject_2025_2.dto.PasswordResetRequest;
 import com.i2.kproject_2025_2.dto.SignupRequest;
 import com.i2.kproject_2025_2.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,5 +50,22 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest req) {
         String token = authService.login(req);
         return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+    // ---------------------- 🔒 비밀번호 찾기 ----------------------
+    @Tag(name = "Auth - Password Reset", description = "비밀번호 찾기")
+    @Operation(summary = "비밀번호 재설정 코드 발송", description = "가입된 이메일로 6자리 인증 코드를 발송합니다.")
+    @PostMapping("/password-reset/send-code")
+    public ResponseEntity<Void> sendPasswordResetCode(@RequestParam String email) {
+        authService.sendPasswordResetCode(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @Tag(name = "Auth - Password Reset")
+    @Operation(summary = "비밀번호 재설정 완료", description = "이메일+코드를 검증하고 새 비밀번호로 변경합니다.")
+    @PostMapping("/password-reset")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody PasswordResetRequest req) {
+        authService.resetPassword(req);
+        return ResponseEntity.ok().build();
     }
 }

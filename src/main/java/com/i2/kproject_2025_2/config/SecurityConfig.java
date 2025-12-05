@@ -86,6 +86,8 @@ public class SecurityConfig {
                                 "/api/auth/verify-code",
                                 "/api/auth/signup",
                                 "/api/auth/login",
+                                "/api/auth/password-reset/send-code",
+                                "/api/auth/password-reset",
                                 "/api/devmail/**"
                         ).permitAll()
 
