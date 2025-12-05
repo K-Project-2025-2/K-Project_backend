@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class TaxiRoom {
 
     public enum Status { OPEN, FULL }
+    public enum OperationStatus { STARTED, ACCEPTED, DEPARTED, ENDED }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +36,13 @@ public class TaxiRoom {
     @Column(nullable = false)
     private Status status = Status.OPEN;
 
+    @Enumerated(EnumType.STRING)
+    private OperationStatus operationStatus; // 운행 진행 상태
+
+    private LocalDateTime operationStartedAt;
+    private LocalDateTime operationDepartedAt;
+    private LocalDateTime operationEndedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leader_id", nullable = false)
     private User leader;
@@ -57,6 +65,14 @@ public class TaxiRoom {
     public void setCapacity(int capacity) { this.capacity = capacity; }
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+    public OperationStatus getOperationStatus() { return operationStatus; }
+    public void setOperationStatus(OperationStatus operationStatus) { this.operationStatus = operationStatus; }
+    public LocalDateTime getOperationStartedAt() { return operationStartedAt; }
+    public void setOperationStartedAt(LocalDateTime operationStartedAt) { this.operationStartedAt = operationStartedAt; }
+    public LocalDateTime getOperationDepartedAt() { return operationDepartedAt; }
+    public void setOperationDepartedAt(LocalDateTime operationDepartedAt) { this.operationDepartedAt = operationDepartedAt; }
+    public LocalDateTime getOperationEndedAt() { return operationEndedAt; }
+    public void setOperationEndedAt(LocalDateTime operationEndedAt) { this.operationEndedAt = operationEndedAt; }
     public User getLeader() { return leader; }
     public void setLeader(User leader) { this.leader = leader; }
     public LocalDateTime getCreatedAt() { return createdAt; }
