@@ -50,6 +50,15 @@ public class TaxiRoomController {
         return ResponseEntity.ok(res);
     }
 
+    @Operation(summary = "내가 속한 택시 방 목록 조회", description = """
+            현재 내가 참여 중인 택시 방들을 조회합니다.
+            """)
+    @GetMapping("/my")
+    public ResponseEntity<java.util.List<RoomResponse>> getMyRooms(Principal principal) {
+        java.util.List<RoomResponse> res = taxiRoomService.getMyRooms(principal.getName());
+        return ResponseEntity.ok(res);
+    }
+
     @Operation(summary = "택시 합승 방 참여", description = """
             기존에 생성된 택시 합승 방에 참여합니다.
             - 방 코드를 통해 참여할 방을 지정합니다.

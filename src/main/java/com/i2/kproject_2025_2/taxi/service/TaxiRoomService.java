@@ -42,6 +42,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -111,6 +112,27 @@ public class TaxiRoomService {
                     return toResponse(room, memberCount);
                 })
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RoomResponse> getMyRooms(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+
+        List<TaxiRoomMember> memberships = memberRepo.findByUser_Id(user.getId());
+        if (memberships.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, TaxiRoom> roomsById = memberships.stream()
+                .collect(Collectors.toMap(m -> m.getRoom().getId(), TaxiRoomMember::getRoom, (a, b) -> a));
+
+        return roomsById.values().stream()
+                .map(room -> {
+                    int memberCount = (int) memberRepo.countByRoom_Id(room.getId());
+                    return toResponse(room, memberCount);
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional
