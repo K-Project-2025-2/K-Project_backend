@@ -41,7 +41,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -138,10 +137,8 @@ public class TaxiRoomService {
         TaxiRoom room = roomRepo.findByRoomCode(req.roomCode())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "방을 찾을 수 없습니다."));
 
-        long memberCountBefore = memberRepo.countByRoom_Id(room.getId());
-        boolean isLeader = room.getLeader().getId().equals(user.getId());
-        if (isLeader && memberCountBefore > 1) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "다른 인원이 있을 때는 방장이 나갈 수 없습니다.");
+        if (room.getLeader().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "방장은 퇴장할 수 없습니다.");
         }
 
         TaxiRoomMember member = memberRepo.findByRoom_IdAndUser_Id(room.getId(), user.getId())
@@ -150,21 +147,6 @@ public class TaxiRoomService {
         memberRepo.delete(member);
 
         long count = memberRepo.countByRoom_Id(room.getId());
-        if (count <= 0) {
-            deleteRoomCompletely(room);
-            return new RoomResponse(
-                    room.getId(),
-                    room.getRoomCode(),
-                    room.getMeetingPoint(),
-                    room.getDestination(),
-                    room.getMeetingTime(),
-                    room.getCapacity(),
-                    room.getStatus().name(),
-                    0,
-                    room.getLeader().getId()
-            );
-        }
-
         if (room.getStatus() == TaxiRoom.Status.FULL && count < room.getCapacity()) {
             room.setStatus(TaxiRoom.Status.OPEN);
             roomRepo.save(room);
@@ -498,27 +480,6 @@ public class TaxiRoomService {
         return messages.stream().map(this::toChatResponse).toList();
     }
 
-    @Transactional(readOnly = true)
-    public List<RoomResponse> getMyRooms(String email) {
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
-
-        List<TaxiRoomMember> memberships = memberRepo.findByUser_Id(user.getId());
-        if (memberships.isEmpty()) {
-            return List.of();
-        }
-
-        Map<Long, TaxiRoom> roomsById = memberships.stream()
-                .collect(Collectors.toMap(m -> m.getRoom().getId(), TaxiRoomMember::getRoom, (a, b) -> a));
-
-        return roomsById.values().stream()
-                .map(room -> {
-                    int memberCount = (int) memberRepo.countByRoom_Id(room.getId());
-                    return toResponse(room, memberCount);
-                })
-                .collect(Collectors.toList());
-    }
-
     private Map<String, Integer> calculateIndividualCosts(int totalAmount, List<TaxiRoomMember> members) {
         int memberCount = members.size();
         int base = totalAmount / memberCount;
@@ -558,18 +519,5 @@ public class TaxiRoomService {
                 memberCount,
                 room.getLeader().getId()
         );
-    }
-
-    private void deleteRoomCompletely(TaxiRoom room) {
-        acceptanceRepo.deleteByRoom_Id(room.getId());
-        messageRepo.deleteByRoom_Id(room.getId());
-
-        splitRepo.findByRoom(room).ifPresent(split -> {
-            splitPaymentRepo.deleteBySplit_Id(split.getId());
-            splitRepo.delete(split);
-        });
-
-        memberRepo.deleteByRoom_Id(room.getId());
-        roomRepo.delete(room);
     }
 }

@@ -8,6 +8,4 @@ public interface TaxiRoomMemberRepository extends JpaRepository<TaxiRoomMember, 
     long countByRoom_Id(Long roomId);
     java.util.Optional<TaxiRoomMember> findByRoom_IdAndUser_Id(Long roomId, Long userId);
     java.util.List<TaxiRoomMember> findByRoom_Id(Long roomId);
-    java.util.List<TaxiRoomMember> findByUser_Id(Long userId);
-    void deleteByRoom_Id(Long roomId);
 }

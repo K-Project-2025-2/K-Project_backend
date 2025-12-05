@@ -1,9 +1,6 @@
 package com.i2.kproject_2025_2.service;
 
-import com.i2.kproject_2025_2.auth.EmailVerificationService;
-import com.i2.kproject_2025_2.auth.VerificationCodeUtil;
 import com.i2.kproject_2025_2.dto.LoginRequest;
-import com.i2.kproject_2025_2.dto.PasswordResetRequest;
 import com.i2.kproject_2025_2.dto.SignupRequest;
 import com.i2.kproject_2025_2.entity.EmailVerificationToken;
 import com.i2.kproject_2025_2.entity.User;
@@ -33,7 +30,6 @@ public class AuthService {
     private final PasswordEncoder encoder;
     private final JavaMailSender mailSender;
     private final JwtUtil jwtUtil;
-    private final EmailVerificationService emailVerificationService;
 
     @Value("${app.allowed-email-domain}")
     private String allowedDomain;
@@ -140,59 +136,5 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
 
         return jwtUtil.generate(user.getEmail(), user.getRole().name());
-    }
-
-    /** 비밀번호 찾기: 인증 코드 발송 */
-    @Transactional
-    public void sendPasswordResetCode(String email) {
-        email = email.trim().toLowerCase();
-        assertSchoolEmail(email);
-
-        userRepo.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "가입되지 않은 이메일입니다."));
-
-        long cooldown = emailVerificationService.checkCooldownSeconds(email);
-        if (cooldown >= 0) {
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "재발송은 " + cooldown + "초 후에 가능합니다.");
-        }
-
-        String code = VerificationCodeUtil.numeric6();
-        emailVerificationService.issueCode(email, code);
-        sendPasswordResetMail(email, code);
-    }
-
-    /** 비밀번호 찾기: 코드 검증 후 비밀번호 변경 */
-    @Transactional
-    public void resetPassword(PasswordResetRequest req) {
-        String email = req.email().trim().toLowerCase();
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "가입되지 않은 이메일입니다."));
-
-        var verifyResult = emailVerificationService.verify(email, req.code());
-        if (!verifyResult.ok()) {
-            HttpStatus status = HttpStatus.BAD_REQUEST;
-            String reason = verifyResult.reason();
-            if ("시도 횟수 초과(잠금). 다시 발송하세요.".equals(reason)) {
-                status = HttpStatus.TOO_MANY_REQUESTS;
-            } else if ("코드가 만료되었거나 발급되지 않았습니다.".equals(reason)) {
-                status = HttpStatus.GONE;
-            }
-
-            if (verifyResult.remainingAttempts() != null) {
-                reason = reason + " (남은 시도: " + verifyResult.remainingAttempts() + ")";
-            }
-            throw new ResponseStatusException(status, reason);
-        }
-
-        user.setPassword(encoder.encode(req.newPassword()));
-        userRepo.save(user);
-    }
-
-    private void sendPasswordResetMail(String to, String code) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(to);
-        msg.setSubject("[K-Project] 비밀번호 재설정 코드");
-        msg.setText("비밀번호 재설정 코드: " + code + "\n10분 이내에 입력 후 새 비밀번호로 변경하세요.");
-        mailSender.send(msg);
     }
 }
