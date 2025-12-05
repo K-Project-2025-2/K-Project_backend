@@ -31,6 +31,7 @@ import com.i2.kproject_2025_2.taxi.repository.TaxiRoomSplitPaymentRepository;
 import com.i2.kproject_2025_2.taxi.repository.TaxiRoomSplitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,6 +98,20 @@ public class TaxiRoomService {
         }
 
         return toResponse(room, (int) count);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RoomResponse> getAllRooms(String email) {
+        userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+
+        List<TaxiRoom> rooms = roomRepo.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+        return rooms.stream()
+                .map(room -> {
+                    int memberCount = (int) memberRepo.countByRoom_Id(room.getId());
+                    return toResponse(room, memberCount);
+                })
+                .toList();
     }
 
     @Transactional
