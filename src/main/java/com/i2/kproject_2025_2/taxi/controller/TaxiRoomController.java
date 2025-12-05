@@ -104,7 +104,7 @@ public class TaxiRoomController {
         return ResponseEntity.ok(res);
     }
 
-    @Operation(summary = "운행 수락", description = """
+    @Operation(summary = "운행 수락..", description = """
             팀원이 운행 출발을 수락합니다.
             - 방장은 자동으로 수락되므로 호출할 수 없습니다.
             - 운행 시작 이후에만 수락할 수 있습니다.
