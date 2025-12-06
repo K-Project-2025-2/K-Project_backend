@@ -174,21 +174,44 @@ public class TaxiRoomService {
         TaxiRoom room = roomRepo.findByRoomCode(req.roomCode())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "방을 찾을 수 없습니다."));
 
-        if (room.getLeader().getId().equals(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "방장은 퇴장할 수 없습니다.");
-        }
-
         TaxiRoomMember member = memberRepo.findByRoom_IdAndUser_Id(room.getId(), user.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "참여 중인 방이 아닙니다."));
 
         memberRepo.delete(member);
+        acceptanceRepo.findByRoom_IdAndUser_Id(room.getId(), user.getId())
+                .ifPresent(acceptanceRepo::delete);
 
         long count = memberRepo.countByRoom_Id(room.getId());
-        if (room.getStatus() == TaxiRoom.Status.FULL && count < room.getCapacity()) {
-            room.setStatus(TaxiRoom.Status.OPEN);
-            roomRepo.save(room);
+        boolean leaderLeaving = room.getLeader().getId().equals(user.getId());
+
+        if (count == 0) {
+            cleanupRoomData(room);
+            return toResponse(room, 0);
         }
 
+        if (room.getStatus() == TaxiRoom.Status.FULL && count < room.getCapacity()) {
+            room.setStatus(TaxiRoom.Status.OPEN);
+        }
+
+        if (leaderLeaving) {
+            TaxiRoomMember newLeaderMember = memberRepo.findByRoom_Id(room.getId()).stream()
+                    .min(Comparator.comparing(TaxiRoomMember::getJoinedAt)
+                            .thenComparing(m -> m.getUser().getId()))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "새로운 방장을 찾을 수 없습니다."));
+
+            room.setLeader(newLeaderMember.getUser());
+
+            boolean operationInProgress = room.getOperationStatus() != null;
+            boolean newLeaderAccepted = acceptanceRepo.existsByRoom_IdAndUser_Id(room.getId(), newLeaderMember.getUser().getId());
+            if (operationInProgress && !newLeaderAccepted) {
+                TaxiRoomOperationAcceptance leaderAccept = new TaxiRoomOperationAcceptance();
+                leaderAccept.setRoom(room);
+                leaderAccept.setUser(newLeaderMember.getUser());
+                acceptanceRepo.save(leaderAccept);
+            }
+        }
+
+        roomRepo.save(room);
         return toResponse(room, (int) count);
     }
 
@@ -515,6 +538,16 @@ public class TaxiRoomService {
         int pageSize = size <= 0 ? 50 : Math.min(size, 200);
         var messages = messageRepo.findByRoom_RoomCodeOrderByCreatedAtDesc(roomCode, PageRequest.of(pageIndex, pageSize));
         return messages.stream().map(this::toChatResponse).toList();
+    }
+
+    private void cleanupRoomData(TaxiRoom room) {
+        splitRepo.findByRoom(room).ifPresent(split -> {
+            splitPaymentRepo.deleteBySplit(split);
+            splitRepo.delete(split);
+        });
+        acceptanceRepo.deleteByRoom_Id(room.getId());
+        messageRepo.deleteByRoom(room);
+        roomRepo.delete(room);
     }
 
     private Map<String, Integer> calculateIndividualCosts(int totalAmount, List<TaxiRoomMember> members) {
