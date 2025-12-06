@@ -12,5 +12,4 @@ public interface TaxiRoomSplitPaymentRepository extends JpaRepository<TaxiRoomSp
     long countBySplit_Id(Long splitId);
     List<TaxiRoomSplitPayment> findBySplit(TaxiRoomSplit split);
     Optional<TaxiRoomSplitPayment> findBySplit_IdAndUser_Id(Long splitId, Long userId);
-    void deleteBySplit(TaxiRoomSplit split);
 }

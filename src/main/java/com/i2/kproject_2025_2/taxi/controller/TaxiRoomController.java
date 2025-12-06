@@ -64,8 +64,7 @@ public class TaxiRoomController {
 
     @Operation(summary = "택시 합승 방 퇴장", description = """
             참여 중인 택시 합승 방에서 나갑니다.
-            - 방장이 나가면 남은 인원 중 가장 먼저 참여한 사용자가 방장이 됩니다.
-            - 모든 사용자가 나가면 방은 삭제됩니다.
+            - 방장은 퇴장할 수 없습니다.
             - 방 코드로 지정하며, 퇴장 후 정원이 남으면 상태가 OPEN으로 갱신됩니다.
             """)
     @PostMapping("/leave")

@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface TaxiRoomMessageRepository extends JpaRepository<TaxiRoomMessage, Long> {
     List<TaxiRoomMessage> findByRoom_RoomCodeOrderByCreatedAtDesc(String roomCode, Pageable pageable);
-    void deleteByRoom(com.i2.kproject_2025_2.taxi.entity.TaxiRoom room);
 }
 
