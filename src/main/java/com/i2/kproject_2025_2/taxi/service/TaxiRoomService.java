@@ -113,6 +113,22 @@ public class TaxiRoomService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<RoomResponse> getMyRooms(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+
+        List<TaxiRoomMember> memberships = memberRepo.findByUser_Id(user.getId());
+        return memberships.stream()
+                .sorted(Comparator.comparing((TaxiRoomMember m) -> m.getRoom().getCreatedAt()).reversed())
+                .map(m -> {
+                    TaxiRoom room = m.getRoom();
+                    int memberCount = (int) memberRepo.countByRoom_Id(room.getId());
+                    return toResponse(room, memberCount);
+                })
+                .toList();
+    }
+
     @Transactional
     public RoomResponse joinRoom(String email, JoinRoomRequest req) {
         User user = userRepo.findByEmail(email)
