@@ -1,10 +1,13 @@
 package com.i2.kproject_2025_2.service;
 
 import com.i2.kproject_2025_2.dto.LoginRequest;
+import com.i2.kproject_2025_2.dto.PasswordResetRequest;
 import com.i2.kproject_2025_2.dto.SignupRequest;
 import com.i2.kproject_2025_2.entity.EmailVerificationToken;
+import com.i2.kproject_2025_2.entity.PasswordResetToken;
 import com.i2.kproject_2025_2.entity.User;
 import com.i2.kproject_2025_2.repository.EmailVerificationTokenRepository;
+import com.i2.kproject_2025_2.repository.PasswordResetTokenRepository;
 import com.i2.kproject_2025_2.repository.UserRepository;
 import com.i2.kproject_2025_2.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class AuthService {
 
     private final UserRepository userRepo;
     private final EmailVerificationTokenRepository verificationRepo;
+    private final PasswordResetTokenRepository resetRepo;
     private final PasswordEncoder encoder;
     private final JavaMailSender mailSender;
     private final JwtUtil jwtUtil;
@@ -75,6 +79,14 @@ public class AuthService {
         msg.setTo(to);
         msg.setSubject("[K-Project] 이메일 인증 코드");
         msg.setText("인증 코드는 " + code + " 입니다. 10분 이내에 입력해주세요.");
+        mailSender.send(msg);
+    }
+
+    private void sendPasswordResetMail(String to, String code) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(to);
+        msg.setSubject("[K-Project] 비밀번호 재설정 코드");
+        msg.setText("비밀번호 재설정 코드: " + code + "\n10분 이내에 입력해주세요.");
         mailSender.send(msg);
     }
 
@@ -136,5 +148,47 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다.");
 
         return jwtUtil.generate(user.getEmail(), user.getRole().name());
+    }
+
+    @Transactional
+    public void sendPasswordResetCode(String email) {
+        email = email.trim().toLowerCase();
+        assertSchoolEmail(email);
+
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "등록되지 않은 이메일입니다."));
+
+        String code = generateVerificationCode();
+        PasswordResetToken token = resetRepo.findByEmail(email).orElse(new PasswordResetToken());
+        token.setEmail(email);
+        token.setCode(code);
+        token.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+        resetRepo.save(token);
+
+        sendPasswordResetMail(email, code);
+    }
+
+    @Transactional
+    public void resetPassword(PasswordResetRequest req) {
+        String email = req.email().trim().toLowerCase();
+
+        PasswordResetToken token = resetRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호 재설정 코드를 먼저 발급받으세요."));
+
+        if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+            resetRepo.delete(token);
+            throw new ResponseStatusException(HttpStatus.GONE, "재설정 코드가 만료되었습니다. 다시 요청해주세요.");
+        }
+
+        if (!token.getCode().equals(req.code())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "재설정 코드가 올바르지 않습니다.");
+        }
+
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "등록되지 않은 이메일입니다."));
+
+        user.setPassword(encoder.encode(req.newPassword()));
+        userRepo.save(user);
+        resetRepo.delete(token); // 일회성 사용
     }
 }
